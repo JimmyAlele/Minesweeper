@@ -10,6 +10,18 @@ fun main() {
     repeat(numberOfMines) {
         rowsWithMines.add(Random.nextInt(1, ROWS + 1))
     }
+
+
+    for (row in 1 .. ROWS) {
+        if (row in rowsWithMines) {
+            val predicate: (Int) -> Boolean = {it == row}
+            val numberOfMinesInRow = rowsWithMines.count(predicate)
+
+        } else {
+            println(".".repeat(COLUMNS))
+        }
+    }
+
 }
 
     /* generate the mines using random numbers
