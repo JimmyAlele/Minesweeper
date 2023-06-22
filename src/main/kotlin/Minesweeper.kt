@@ -5,13 +5,19 @@ const val COLUMNS = 9
 
 fun main() {
 
-    val numberOfMines = readln().toInt()
+    /*val numberOfMines = readln().toInt()
     val mineField1 = MineField(ROWS, COLUMNS, numberOfMines)
     val mineLocations = mineField1.addMines()
     //println(mineLocations)
     mineField1.addHints()
     mineField1.hideMines()
-    mineField1.takeGuesses(mineLocations)
+    mineField1.takeGuesses(mineLocations)*/
+
+
+
+    for (element in Rainbow) {
+
+    }
 }
 
 class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
@@ -123,4 +129,14 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
             field[i].add(0, stuff[i].toString())
         }
     }
+}
+
+enum class Rainbow (knownName:String) {
+    RED("red"),
+    ORANGE("orange"),
+    YELLOW("yellow"),
+    GREEN("green"),
+    BLUE("blue"),
+    INDIGO("indigo"),
+    VIOLET("violet")
 }
