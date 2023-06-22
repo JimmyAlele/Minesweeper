@@ -1,27 +1,23 @@
 package minesweeper
 import kotlin.random.Random
+
 const val ROWS = 9
 const val COLUMNS = 9
 
 fun main() {
 
-    /*val numberOfMines = readln().toInt()
+    val numberOfMines = readln().toInt()
     val mineField1 = MineField(ROWS, COLUMNS, numberOfMines)
     val mineLocations = mineField1.addMines()
     //println(mineLocations)
     mineField1.addHints()
     mineField1.hideMines()
-    mineField1.takeGuesses(mineLocations)*/
-
-
-
-    for (element in Rainbow) {
-
-    }
+    mineField1.takeGuesses(mineLocations)
 }
 
 class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
     private val field = MutableList(rows) {MutableList(columns) {"."} }
+    private val printedField = mutableListOf<MutableList<String>>()
     private var n: Int = 0
 
     fun addMines (): MutableList<MutableList<Int>> {
@@ -56,7 +52,8 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     private fun printMineField() {
-        field.forEach{
+        beautifyField()
+        printedField.forEach{
             println(it.joinToString(""))
         }
     }
@@ -113,30 +110,21 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     fun beautifyField () {
-        field.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
-        field.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
+        printedField.addAll(field)
+        printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
+        printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
         for (i in 0 until columns) {
-            field[0][i] = (i + 1).toString()
+            printedField[0][i] = (i + 1).toString()
         }
-        field.addAll(field.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
-        for (i in field.indices) {
-            field[i].add(0,"|")
-            field[i].add(field[i].lastIndex + 1, "|")
+        printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
+        for (i in printedField.indices) {
+            printedField[i].add(0,"|")
+            printedField[i].add(printedField[i].lastIndex + 1, "|")
         }
 
         val stuff = listOf (" ", "-", 1, 2, 3, 4, 5, 6, 7, 8, 9, "-")
-        for (i in field.indices) {
-            field[i].add(0, stuff[i].toString())
+        for (i in printedField.indices) {
+            printedField[i].add(0, stuff[i].toString())
         }
     }
-}
-
-enum class Rainbow (knownName:String) {
-    RED("red"),
-    ORANGE("orange"),
-    YELLOW("yellow"),
-    GREEN("green"),
-    BLUE("blue"),
-    INDIGO("indigo"),
-    VIOLET("violet")
 }
