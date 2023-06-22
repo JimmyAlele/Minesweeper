@@ -9,7 +9,7 @@ fun main() {
     val numberOfMines = readln().toInt()
     val mineField1 = MineField(ROWS, COLUMNS, numberOfMines)
     val mineLocations = mineField1.addMines()
-    //println(mineLocations)
+    println(mineLocations)
     mineField1.addHints()
     mineField1.hideMines()
     mineField1.takeGuesses(mineLocations)
@@ -17,7 +17,7 @@ fun main() {
 
 class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
     private val field = MutableList(rows) {MutableList(columns) {"."} }
-    private val printedField = mutableListOf<MutableList<String>>()
+    private var printedField = mutableListOf<MutableList<String>>()
     private var n: Int = 0
 
     fun addMines (): MutableList<MutableList<Int>> {
@@ -52,7 +52,7 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     private fun printMineField() {
-        beautifyField()
+        printedField = beautifyField()
         printedField.forEach{
             println(it.joinToString(""))
         }
@@ -109,22 +109,27 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         println("Congratulations! You found all the mines!")
     }
 
-    fun beautifyField () {
+    private fun beautifyField (): MutableList<MutableList<String>> {
+        printedField.clear()
         printedField.addAll(field)
         printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
-        printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
+        printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
+        printedField.addAll(0, MutableList(1) {MutableList(columns) {""} })
         for (i in 0 until columns) {
             printedField[0][i] = (i + 1).toString()
         }
-        printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
+
         for (i in printedField.indices) {
             printedField[i].add(0,"|")
+            println("i is $i")
             printedField[i].add(printedField[i].lastIndex + 1, "|")
+            println("last index is ${printedField.lastIndex+1}")
         }
 
-        val stuff = listOf (" ", "-", 1, 2, 3, 4, 5, 6, 7, 8, 9, "-")
+        /*val stuff = listOf (" ", "-", 1, 2, 3, 4, 5, 6, 7, 8, 9, "-")
         for (i in printedField.indices) {
             printedField[i].add(0, stuff[i].toString())
-        }
+        }*/
+        return printedField
     }
 }
