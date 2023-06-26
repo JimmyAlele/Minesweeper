@@ -5,7 +5,6 @@ const val ROWS = 9
 const val COLUMNS = 9
 
 fun main() {
-
     val numberOfMines = readln().toInt()
     val mineField1 = MineField(ROWS, COLUMNS, numberOfMines)
     val mineLocations = mineField1.addMines()
@@ -120,9 +119,13 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
             printedField[i].add(printedField[i].lastIndex + 1, "|")
         }
 
-        val stuff = listOf (" ", "-", 1, 2, 3, 4, 5, 6, 7, 8, 9, "-")
         for (i in printedField.indices) {
-            printedField[i].add(0, stuff[i].toString())
+            when (i) {
+                0 -> printedField[i].add(0, " ")
+                1 -> printedField[i].add(0, "-")
+                printedField.lastIndex -> printedField[i].add(0, "-")
+                else -> printedField[i].add(0, (i - 1).toString())
+            }
         }
         return printedField
     }
