@@ -1,8 +1,4 @@
 package minesweeper
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 import kotlin.random.Random
 
 const val ROWS = 9
@@ -111,8 +107,7 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     private fun beautifyField (): MutableList<MutableList<String>> {
-        var printedField = mutableListOf<MutableList<String>>()
-        printedField = field.clone()
+        val printedField = field.map { it. toMutableList() }.toMutableList()
         printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
         printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
         printedField.addAll(0, MutableList(1) {MutableList(columns) {""} })
@@ -130,19 +125,5 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
             printedField[i].add(0, stuff[i].toString())
         }
         return printedField
-    }
-}
-
-fun <T> T.clone() : T
-{
-    val byteArrayOutputStream= ByteArrayOutputStream()
-    ObjectOutputStream(byteArrayOutputStream).use { outputStream ->
-        outputStream.writeObject(this)
-    }
-
-    val bytes=byteArrayOutputStream.toByteArray()
-
-    ObjectInputStream(ByteArrayInputStream(bytes)).use { inputStream ->
-        return inputStream.readObject() as T
     }
 }
