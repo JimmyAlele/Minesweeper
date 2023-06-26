@@ -1,4 +1,8 @@
 package minesweeper
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import kotlin.random.Random
 
 const val ROWS = 9
@@ -17,7 +21,6 @@ fun main() {
 
 class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
     private val field = MutableList(rows) {MutableList(columns) {"."} }
-    private var printedField = mutableListOf<MutableList<String>>()
     private var n: Int = 0
 
     fun addMines (): MutableList<MutableList<Int>> {
@@ -52,8 +55,7 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     private fun printMineField() {
-        printedField = beautifyField()
-        printedField.forEach{
+        beautifyField().forEach{
             println(it.joinToString(""))
         }
     }
@@ -77,28 +79,27 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         while (mLocations.isNotEmpty() && minesGuessedWrong.isNotEmpty()) {
             printMineField()
             println("Set/delete mines marks (x and y coordinates):")
-            val (x, y) = readln().split(" ")
+            val (y, x) = readln().split(" ").map { it.toInt()-1 }
 
-            when (field[x.toInt()][y.toInt()]) {
+            when (field[x][y]) {
                 "." -> {
-                    field[x.toInt()][y.toInt()] = "*"
-                    if (mutableListOf(x.toInt(), y.toInt()) in mLocations) {
-                        mLocations.remove(mutableListOf(x.toInt(), y.toInt()))
-                        minesGuessedWrong.remove(mutableListOf(x.toInt(), y.toInt()))
+                    field[x][y] = "*"
+                    if (mutableListOf(x, y) in mLocations) {
+                        mLocations.remove(mutableListOf(x, y))
+                        minesGuessedWrong.remove(mutableListOf(x, y))
                         printMineField()
                     } else {
-                        minesGuessedWrong.add(mutableListOf(x.toInt(), y.toInt()))
-                        printMineField()
+                        minesGuessedWrong.add(mutableListOf(x, y))
                     }
                 }
                 "*" -> {
-                    field[x.toInt()][y.toInt()] = "."
-                    if (mutableListOf(x.toInt(), y.toInt()) in locations) {
-                        mLocations.add(mutableListOf(x.toInt(), y.toInt()))
+                    field[x][y] = "."
+                    if (mutableListOf(x, y) in locations) {
+                        mLocations.add(mutableListOf(x, y))
                         printMineField()
                     } else {
-                        minesGuessedWrong.remove(mutableListOf(x.toInt(), y.toInt()))
-                        printMineField()
+                        minesGuessedWrong.remove(mutableListOf(x, y))
+                        //printMineField()
                     }
                 }
                 else -> {
@@ -110,8 +111,8 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     private fun beautifyField (): MutableList<MutableList<String>> {
-        printedField.clear()
-        printedField.addAll(field)
+        var printedField = mutableListOf<MutableList<String>>()
+        printedField = field.clone()
         printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
         printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
         printedField.addAll(0, MutableList(1) {MutableList(columns) {""} })
@@ -120,16 +121,28 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         }
 
         for (i in printedField.indices) {
-            printedField[i].add(0,"|")
-            println("i is $i")
+            printedField[i].add(0, "|")
             printedField[i].add(printedField[i].lastIndex + 1, "|")
-            println("last index is ${printedField.lastIndex+1}")
         }
 
-        /*val stuff = listOf (" ", "-", 1, 2, 3, 4, 5, 6, 7, 8, 9, "-")
+        val stuff = listOf (" ", "-", 1, 2, 3, 4, 5, 6, 7, 8, 9, "-")
         for (i in printedField.indices) {
             printedField[i].add(0, stuff[i].toString())
-        }*/
+        }
         return printedField
+    }
+}
+
+fun <T> T.clone() : T
+{
+    val byteArrayOutputStream= ByteArrayOutputStream()
+    ObjectOutputStream(byteArrayOutputStream).use { outputStream ->
+        outputStream.writeObject(this)
+    }
+
+    val bytes=byteArrayOutputStream.toByteArray()
+
+    ObjectInputStream(ByteArrayInputStream(bytes)).use { inputStream ->
+        return inputStream.readObject() as T
     }
 }
