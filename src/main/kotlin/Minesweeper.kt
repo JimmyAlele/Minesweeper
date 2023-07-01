@@ -5,21 +5,31 @@ const val ROWS = 9
 const val COLUMNS = 9
 
 fun main() {
+
+    println("How many mines do you want on the field?")
     val numberOfMines = readln().toInt()
     val mineField1 = MineField(ROWS, COLUMNS, numberOfMines)
+    mineField1.printMineField(mineField1.displayedField)
     val mineLocations = mineField1.addMines()
-    println(mineLocations)
     mineField1.addHints()
-    mineField1.hideMines()
-    mineField1.takeGuesses(mineLocations)
+    mineField1.printMineField(mineField1.field)
+    mineField1.printMineField(mineField1.displayedField)
+    println(mineLocations)
+    //mineField1.takeGuesses(mineLocations)
 }
 
 class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
-    private val field = MutableList(rows) {MutableList(columns) {"."} }
-    private var n: Int = 0
+    val field = MutableList(rows) {MutableList(columns) {"."} }
+    val displayedField = MutableList(rows) {MutableList(columns) {"."} }
 
     fun addMines (): MutableList<MutableList<Int>> {
+        println("Set/unset mine marks or claim a cell as free:")
+        val (y, x) = readln().split(" ").subList(0, 2).map {it.toInt() - 1}
         val mineLocations = mutableListOf<MutableList<Int>>()
+        mineLocations.add(mutableListOf(x, y))
+        field[x][y] = "X"
+        var n: Int = 1 //starting with the first free mine location entered by the user
+
         while (n != numberOfMines) {
             val x: Int = Random.nextInt(0, rows)
             val y: Int = Random.nextInt(0, columns)
@@ -49,22 +59,6 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         }
     }
 
-    private fun printMineField() {
-        beautifyField().forEach{
-            println(it.joinToString(""))
-        }
-    }
-
-    fun hideMines () {
-        for (row in 0 until ROWS) {
-            for (column in 0 until COLUMNS) {
-                if (field[row][column] == "X") {
-                    field[row][column] = "."
-                }
-            }
-        }
-    }
-
     fun takeGuesses (locations: MutableList<MutableList<Int>>) {
         val minesGuessedWrong = mutableListOf<MutableList<Int>>()
         minesGuessedWrong.addAll(locations)
@@ -72,45 +66,46 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         mLocations.addAll(locations)
 
         while (mLocations.isNotEmpty() && minesGuessedWrong.isNotEmpty()) {
-            printMineField()
-            println("Set/delete mines marks (x and y coordinates):")
-            val (y, x) = readln().split(" ").map { it.toInt()-1 }
+            println("Set/unset mine marks or claim a cell as free:")
+            val (coordinateY, coordinateX, action) = readln().split(" ")
+            val y = coordinateY.toInt() - 1
+            val x = coordinateX.toInt() - 1
 
-            when (field[x][y]) {
-                "." -> {
-                    field[x][y] = "*"
+            when (action) {
+                "mine" -> {
                     if (mutableListOf(x, y) in mLocations) {
                         mLocations.remove(mutableListOf(x, y))
                         minesGuessedWrong.remove(mutableListOf(x, y))
-                        printMineField()
+                        displayedField[x][y] = "*"
+                        printMineField(displayedField)
                     } else {
                         minesGuessedWrong.add(mutableListOf(x, y))
+                        displayedField[x][y] = "*"
+                        printMineField(displayedField)
                     }
                 }
-                "*" -> {
-                    field[x][y] = "."
+                "free" -> {
                     if (mutableListOf(x, y) in locations) {
-                        mLocations.add(mutableListOf(x, y))
-                        printMineField()
+                        println("You stepped on a mine and failed!")
+                        printMineField(displayedField)
                     } else {
                         minesGuessedWrong.remove(mutableListOf(x, y))
-                        //printMineField()
                     }
                 }
                 else -> {
-                    println("There is a number here!")
                 }
             }
         }
+
         println("Congratulations! You found all the mines!")
     }
 
-    private fun beautifyField (): MutableList<MutableList<String>> {
-        val printedField = field.map { it. toMutableList() }.toMutableList()
-        printedField.addAll(0, MutableList(1) {MutableList(columns) {"-"} })
-        printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(columns) {"-"} })
-        printedField.addAll(0, MutableList(1) {MutableList(columns) {""} })
-        for (i in 0 until columns) {
+    fun printMineField (sampleField: MutableList<MutableList<String>>): Unit {
+        val printedField = sampleField.map { it. toMutableList() }.toMutableList()
+        printedField.addAll(0, MutableList(1) {MutableList(sampleField[0].size) {"-"} })
+        printedField.addAll(printedField.lastIndex + 1, MutableList(1) {MutableList(sampleField[0].size) {"-"} })
+        printedField.addAll(0, MutableList(1) {MutableList(sampleField[0].size) {""} })
+        for (i in 0 until sampleField[0].size) {
             printedField[0][i] = (i + 1).toString()
         }
 
@@ -127,6 +122,8 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
                 else -> printedField[i].add(0, (i - 1).toString())
             }
         }
-        return printedField
+        printedField.forEach{ println(it.joinToString("")) }
     }
+
+
 }
