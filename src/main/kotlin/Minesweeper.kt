@@ -12,10 +12,10 @@ fun main() {
     mineField1.printMineField(mineField1.displayedField)
     val mineLocations = mineField1.addMines()
     mineField1.addHints()
-    mineField1.printMineField(mineField1.field)
+    //mineField1.printMineField(mineField1.field)
     mineField1.printMineField(mineField1.displayedField)
     println(mineLocations)
-    //mineField1.takeGuesses(mineLocations)
+    mineField1.takeGuesses(mineLocations)
 }
 
 class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
@@ -89,7 +89,8 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
                         println("You stepped on a mine and failed!")
                         printMineField(displayedField)
                     } else {
-                        minesGuessedWrong.remove(mutableListOf(x, y))
+                        floodFill(x, y)
+                        printMineField(displayedField)
                     }
                 }
                 else -> {
@@ -123,6 +124,26 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
             }
         }
         printedField.forEach{ println(it.joinToString("")) }
+    }
+
+    private fun floodFill (x: Int, y: Int) {
+        val queue = mutableListOf<MutableList<Int>>(mutableListOf(x, y))
+        do {
+            for (loc in queue) {
+                val a = loc[0]
+                val b = loc[1]
+                displayedField[a][b] = "/"
+                queue.remove(mutableListOf(a, b))
+                for (x in maxOf(a - 1, 0) .. minOf(a + 1, ROWS - 1)) {
+                    for (y in maxOf(0, b - 1) .. minOf(b + 1, COLUMNS - 1)) {
+                        when (field[x][y]) {
+                            "." -> queue.add(mutableListOf(x, y))
+                            "1", "2", "3", "4", "5", "6", "7", "8" -> displayedField[x][y] = field[x][y]
+                        }
+                    }
+                }
+            }
+        } while (queue.isNotEmpty())
     }
 
 
