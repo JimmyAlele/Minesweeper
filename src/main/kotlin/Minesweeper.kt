@@ -136,25 +136,24 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     }
 
     private fun floodFill (x: Int, y: Int) {
-        var count = 0
         val queue = mutableListOf(mutableListOf(x, y))
+        val checked = mutableListOf<MutableList<Int>>()
         do {
             for (loc in queue) {
                 val a = loc[0]
                 val b = loc[1]
                 displayedField[a][b] = "/"
-                count ++
-                queue.remove(mutableListOf(a, b))
+                checked.add(mutableListOf(a, b))
                 for (i in maxOf(a - 1, 0) .. minOf(a + 1, ROWS - 1)) {
                     for (j in maxOf(0, b - 1) .. minOf(b + 1, COLUMNS - 1)) {
-                        when (field[i][j]) {
-                            "." -> queue.add(mutableListOf(i, j))
-                            "1", "2", "3", "4", "5", "6", "7", "8" -> displayedField[i][j] = field[i][j]
+                        when {
+                            (field[i][j]) == "." && mutableListOf(i, j) !in checked -> queue.add(mutableListOf(i, j))
+                            else -> displayedField[i][j] = field[i][j]
                         }
                     }
                 }
             }
-        } while (queue.size != count)
+        } while (queue.size != checked.size)
     }
 
 
