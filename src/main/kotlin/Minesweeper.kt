@@ -45,7 +45,7 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
             }
         }
         addHints()
-        floodFill(freeX,freeY)
+        dfs(freeX,freeY)
         printMineField(displayedField)
         return mineLocations
     }
@@ -69,10 +69,11 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
     fun takeGuesses (locations: MutableList<MutableList<Int>>) {
         val minesGuessedWrong = mutableListOf<MutableList<Int>>()
         minesGuessedWrong.addAll(locations)
-        val mLocations = mutableListOf<MutableList<Int>>()
+        val mLocations = mutableListOf<MutableList<Int>>() // list of actual mine locations adjusted according to guesses
         mLocations.addAll(locations)
+        var correctMines = 0
 
-        while (mLocations.isNotEmpty() && minesGuessedWrong.isNotEmpty()) {
+        while (mLocations.isNotEmpty() && minesGuessedWrong.isNotEmpty() && correctMines != numberOfMines) {
             println("Set/unset mine marks or claim a cell as free:")
             val (coordinateY, coordinateX, action) = readln().split(" ")
             val y = coordinateY.toInt() - 1
@@ -84,6 +85,7 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
                         mLocations.remove(mutableListOf(x, y))
                         minesGuessedWrong.remove(mutableListOf(x, y))
                         displayedField[x][y] = "*"
+                        correctMines ++
                         printMineField(displayedField)
                     } else {
                         minesGuessedWrong.add(mutableListOf(x, y))
@@ -98,7 +100,7 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
                         printMineField(displayedField)
                         break
                     } else {
-                        floodFill(x, y)
+                        dfs(x, y)
                         printMineField(displayedField)
                     }
                 }
@@ -135,26 +137,17 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         printedField.forEach{ println(it.joinToString("")) }
     }
 
-    private fun floodFill (x: Int, y: Int) {
-        val queue = mutableListOf(mutableListOf(x, y))
-        val checked = mutableListOf<MutableList<Int>>()
-        do {
-            for (loc in queue) {
-                val a = loc[0]
-                val b = loc[1]
-                displayedField[a][b] = "/"
-                checked.add(mutableListOf(a, b))
-                for (i in maxOf(a - 1, 0) .. minOf(a + 1, ROWS - 1)) {
-                    for (j in maxOf(0, b - 1) .. minOf(b + 1, COLUMNS - 1)) {
-                        when {
-                            (field[i][j]) == "." && mutableListOf(i, j) !in checked -> queue.add(mutableListOf(i, j))
-                            else -> displayedField[i][j] = field[i][j]
-                        }
-                    }
-                }
-            }
-        } while (queue.size != checked.size)
+    private fun dfs (x: Int, y: Int) {
+        val list = listOf("1", "2", "3", "4", "5", "6", "7", "8")
+        when {
+            x < 0 || x >= ROWS || y < 0 || y >= COLUMNS -> return
+            field[x][y] in list -> { displayedField[x][y] = field[x][y]; return }
+            displayedField[x][y] == "/" -> return
+            field[x][y] == "." -> displayedField[x][y] = "/"
+        }
+        dfs(x + 1, y)
+        dfs(x - 1, y)
+        dfs(x, y + 1)
+        dfs(x, y - 1)
     }
-
-
 }
