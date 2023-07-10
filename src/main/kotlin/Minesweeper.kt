@@ -15,7 +15,7 @@ fun main() {
     mineField1.takeGuesses(mineLocations)
 }
 
-class MineField (private val rows: Int, private val columns: Int, private val numberOfMines: Int) {
+class MineField (rows: Int, private val columns: Int, private val numberOfMines: Int) {
     private val field = MutableList(rows) {MutableList(columns) {"."} }
     val displayedField = MutableList(rows) {MutableList(columns) {"."} }
 
@@ -29,11 +29,12 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         var n = 0
 
         val cells = mutableListOf<MutableList<Int>>()
-        for (b in 0 .. 9) {
-            for (c in 0 .. 9) {
+        for (b in 0 until ROWS) {
+            for (c in 0 until COLUMNS) {
                 cells.add(mutableListOf(b,c))
             }
         }
+        cells.remove(mutableListOf(fX, fY))
 
         when (action) {
             "free" -> {
@@ -42,21 +43,10 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
                     val x: Int = cells[pos][0]
                     val y: Int = cells[pos][1]
 
-                    if (field[x][y] != "X" && (x != fX && y != fY)) {
-                        field[x][y] = "X"
-                        mineLocations.add(mutableListOf(x, y))
-                        cells.remove(mutableListOf(x, y))
-                        n ++
-                    }
-
-                    /*for (i in maxOf(fX - 1, 0) .. minOf(fX + 1, ROWS - 1)) {
-                        for (j in maxOf(0, fY - 1) .. minOf(fY + 1, COLUMNS - 1)) {
-                            if (field[i][j] == "X") {
-                                field[i][j] = "."
-                                n -= 1
-                            }
-                        }
-                    }*/
+                    field[x][y] = "X"
+                    mineLocations.add(mutableListOf(x, y))
+                    cells.remove(mutableListOf(x, y))
+                    n ++
                 }
                 addHints()
                 dfs(fX,fY)
@@ -64,14 +54,15 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
             "mine" -> {
                 displayedField[fX][fY] = "*"
                 while (n != numberOfMines) {
-                    val x: Int = Random.nextInt(0, rows)
-                    val y: Int = Random.nextInt(0, columns)
+                    val pos: Int = Random.nextInt(0, cells.lastIndex)
+                    val x: Int = cells[pos][0]
+                    val y: Int = cells[pos][1]
 
-                    if (field[x][y] != "X") {
-                        field[x][y] = "X"
-                        mineLocations.add(mutableListOf(x, y))
-                        n ++
-                    }}
+                    field[x][y] = "X"
+                    mineLocations.add(mutableListOf(x, y))
+                    cells.remove(mutableListOf(x, y))
+                    n ++
+                }
                 addHints()
             }
         }
@@ -190,6 +181,5 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         dfs(x - 1, y - 1)
         dfs(x - 1, y + 1)
         dfs(x + 1, y - 1)
-
     }
 }
