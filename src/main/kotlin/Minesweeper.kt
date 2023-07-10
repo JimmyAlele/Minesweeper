@@ -21,31 +21,60 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
 
     fun addMines (): MutableList<MutableList<Int>> {
         println("Set/unset mine marks or claim a cell as free:")
-        val (freeY, freeX) = readln().split(" ").subList(0, 2).map {it.toInt() - 1}
+        val (firstY, firstX, action) = readln().split(" ")
+        val fY = firstY.toInt() - 1
+        val fX = firstX.toInt() - 1
+
         val mineLocations = mutableListOf<MutableList<Int>>()
         var n = 0
 
-        while (n != numberOfMines) {
-            val x: Int = Random.nextInt(0, rows)
-            val y: Int = Random.nextInt(0, columns)
-
-            if (field[x][y] != "X" && (x != freeX && y != freeY)) {
-                field[x][y] = "X"
-                mineLocations.add(mutableListOf(x, y))
-                n++
-            }
-
-            for (i in maxOf(freeX - 1, 0) .. minOf(freeX + 1, ROWS - 1)) {
-                for (j in maxOf(0, freeY - 1) .. minOf(freeY + 1, COLUMNS - 1)) {
-                    if (field[i][j] == "X") {
-                        field[i][j] = "."
-                        n -= 1
-                    }
-                }
+        val cells = mutableListOf<MutableList<Int>>()
+        for (b in 0 .. 9) {
+            for (c in 0 .. 9) {
+                cells.add(mutableListOf(b,c))
             }
         }
-        addHints()
-        dfs(freeX,freeY)
+
+        when (action) {
+            "free" -> {
+                while (n != numberOfMines) {
+                    val pos: Int = Random.nextInt(0, cells.lastIndex)
+                    val x: Int = cells[pos][0]
+                    val y: Int = cells[pos][1]
+
+                    if (field[x][y] != "X" && (x != fX && y != fY)) {
+                        field[x][y] = "X"
+                        mineLocations.add(mutableListOf(x, y))
+                        cells.remove(mutableListOf(x, y))
+                        n ++
+                    }
+
+                    /*for (i in maxOf(fX - 1, 0) .. minOf(fX + 1, ROWS - 1)) {
+                        for (j in maxOf(0, fY - 1) .. minOf(fY + 1, COLUMNS - 1)) {
+                            if (field[i][j] == "X") {
+                                field[i][j] = "."
+                                n -= 1
+                            }
+                        }
+                    }*/
+                }
+                addHints()
+                dfs(fX,fY)
+            }
+            "mine" -> {
+                displayedField[fX][fY] = "*"
+                while (n != numberOfMines) {
+                    val x: Int = Random.nextInt(0, rows)
+                    val y: Int = Random.nextInt(0, columns)
+
+                    if (field[x][y] != "X") {
+                        field[x][y] = "X"
+                        mineLocations.add(mutableListOf(x, y))
+                        n ++
+                    }}
+                addHints()
+            }
+        }
         printMineField(displayedField)
         return mineLocations
     }
@@ -81,15 +110,23 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
 
             when (action) {
                 "mine" -> {
-                    if (mutableListOf(x, y) in mLocations) {
+                    if (mutableListOf(x, y) in mLocations && displayedField[x][y] != "*") {
                         mLocations.remove(mutableListOf(x, y))
                         minesGuessedWrong.remove(mutableListOf(x, y))
                         displayedField[x][y] = "*"
                         correctMines ++
                         printMineField(displayedField)
-                    } else {
+                    } else if (mutableListOf(x, y) in mLocations && displayedField[x][y] == "*") {
+                        minesGuessedWrong.add(mutableListOf(x, y))
+                        displayedField[x][y] = "."
+                        printMineField(displayedField)
+                    } else if (mutableListOf(x, y) !in mLocations && displayedField[x][y] != "*") {
                         minesGuessedWrong.add(mutableListOf(x, y))
                         displayedField[x][y] = "*"
+                        printMineField(displayedField)
+                    } else {
+                        minesGuessedWrong.remove(mutableListOf(x, y))
+                        displayedField[x][y] = "."
                         printMineField(displayedField)
                     }
                 }
@@ -149,5 +186,10 @@ class MineField (private val rows: Int, private val columns: Int, private val nu
         dfs(x - 1, y)
         dfs(x, y + 1)
         dfs(x, y - 1)
+        dfs(x + 1, y + 1)
+        dfs(x - 1, y - 1)
+        dfs(x - 1, y + 1)
+        dfs(x + 1, y - 1)
+
     }
 }
